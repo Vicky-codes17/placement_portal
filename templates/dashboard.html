@@ -1,0 +1,427 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;">
+	<div>
+		<h1>{{ role|capitalize }} Dashboard</h1>
+		<p class="muted">Signed in as {{ current_user.name }} ({{ current_user.role }})</p>
+	</div>
+	<div class="navlinks">
+		<a href="{{ url_for('dashboard.role_dashboard', role='student') }}">Student</a>
+		<a href="{{ url_for('dashboard.role_dashboard', role='faculty') }}">Faculty</a>
+		<a href="{{ url_for('dashboard.role_dashboard', role='tpo') }}">TPO</a>
+		<a href="{{ url_for('dashboard.role_dashboard', role='admin') }}">Admin</a>
+	</div>
+</div>
+
+{% if role == 'student' %}
+<div class="grid" style="margin-top: 20px;">
+	<section class="panel">
+		<h2>Open Jobs</h2>
+		{% if jobs %}
+			{% for job in jobs %}
+			<div class="panel" style="margin-top: 12px; background: white;">
+				<h3 style="margin: 0 0 6px;">{{ job.title }}</h3>
+				<p class="muted">{{ job.company }} • Posted by {{ job.posted_by_name }}</p>
+				<p style="margin-top: 8px;">{{ job.description }}</p>
+				<form method="POST" action="{{ url_for('jobs.apply_for_job', job_id=job.id) }}" style="margin-top: 12px;">
+					<button class="button" type="submit">Apply</button>
+				</form>
+			</div>
+			{% endfor %}
+		{% else %}
+			<p class="muted">No open jobs yet.</p>
+		{% endif %}
+	</section>
+	<section class="panel">
+		<h2>My Applications</h2>
+		{% if applications %}
+			{% for application in applications %}
+				<div class="panel" style="margin-top: 12px; background: white;">
+					<strong>{{ application.title }}</strong>
+					<p class="muted">{{ application.company }}</p>
+					<p>Status: {{ application.status }}</p>
+				</div>
+			{% endfor %}
+		{% else %}
+			<p class="muted">No applications yet.</p>
+		{% endif %}
+	</section>
+</div>
+{% elif role == 'faculty' %}
+<div class="grid" style="margin-top: 20px;">
+	<section class="panel">
+		<h2>Approved Students</h2>
+		{% if students %}
+			<table>
+				<tr><th>Name</th><th>Email</th><th>Status</th></tr>
+				{% for student in students %}
+				<tr>
+					<td>{{ student.name }}</td>
+					<td>{{ student.email }}</td>
+					<td>{{ 'Approved' if student.approved else 'Pending' }}</td>
+				</tr>
+				{% endfor %}
+			</table>
+		{% else %}
+			<p class="muted">No student records found.</p>
+		{% endif %}
+	</section>
+	<section class="panel">
+		<h2>Notifications</h2>
+		{% if notifications %}
+			{% for note in notifications %}
+				<div class="panel" style="margin-top: 12px; background: white;">
+					<p>{{ note.message }}</p>
+					<p class="muted">{{ note.created_at }}</p>
+				</div>
+			{% endfor %}
+		{% else %}
+			<p class="muted">No notifications yet.</p>
+		{% endif %}
+	</section>
+</div>
+{% elif role == 'tpo' %}
+<div class="grid" style="margin-top: 20px;">
+	<section class="panel">
+		<h2>Post a Job</h2>
+		<form method="POST" action="{{ url_for('jobs.post_job') }}" style="display: grid; gap: 12px; margin-top: 14px;">
+			<input name="title" type="text" placeholder="Job title" style="padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px;">
+			<input name="company" type="text" placeholder="Company" style="padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px;">
+			<textarea name="description" rows="4" placeholder="Description" style="padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px;"></textarea>
+			<button class="button" type="submit">Post Job</button>
+		</form>
+	</section>
+	<section class="panel">
+		<h2>Posted Jobs</h2>
+		{% if jobs %}
+			{% for job in jobs %}
+				<div class="panel" style="margin-top: 12px; background: white;">
+					<h3 style="margin: 0 0 6px;">{{ job.title }}</h3>
+					<p class="muted">{{ job.company }} • {{ job.status }}</p>
+					<p>{{ job.description }}</p>
+				</div>
+			{% endfor %}
+		{% else %}
+			<p class="muted">No jobs posted yet.</p>
+		{% endif %}
+	</section>
+	<section class="panel">
+		<h2>Applications</h2>
+		{% if applications %}
+			{% for application in applications %}
+				<div class="panel" style="margin-top: 12px; background: white;">
+					<strong>{{ application.title }}</strong>
+					<p class="muted">{{ application.company }}</p>
+					<p>{{ application.student_name }} ({{ application.student_email }})</p>
+					<p>Status: {{ application.status }}</p>
+				</div>
+			{% endfor %}
+		{% else %}
+			<p class="muted">No applications yet.</p>
+		{% endif %}
+	</section>
+</div>
+{% elif role == 'admin' %}
+<div class="grid" style="margin-top: 20px;">
+	<section class="panel">
+		<h2>Pending Approvals</h2>
+		{% if pending_users %}
+			{% for user in pending_users %}
+				<div class="panel" style="margin-top: 12px; background: white;">
+					<strong>{{ user.name }}</strong>
+					<p class="muted">{{ user.email }} • {{ user.role }}</p>
+					<form method="POST" action="{{ url_for('admin.approve_user', user_id=user.id) }}" style="margin-top: 12px;">
+						<button class="button" type="submit">Approve</button>
+					</form>
+				</div>
+			{% endfor %}
+		{% else %}
+			<p class="muted">No pending users.</p>
+		{% endif %}
+	</section>
+	<section class="panel">
+		<h2>All Users</h2>
+		{% if users %}
+			<table>
+				<tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th></tr>
+				{% for user in users %}
+				<tr>
+					<td>{{ user.name }}</td>
+					<td>{{ user.email }}</td>
+					<td>{{ user.role }}</td>
+					<td>{{ 'Approved' if user.approved else 'Pending' }}</td>
+				</tr>
+				{% endfor %}
+			</table>
+		{% endif %}
+	</section>
+	<section class="panel">
+		<h2>All Jobs</h2>
+		{% if jobs %}
+			{% for job in jobs %}
+				<div class="panel" style="margin-top: 12px; background: white;">
+					<strong>{{ job.title }}</strong>
+					<p class="muted">{{ job.company }} • Posted by {{ job.posted_by_name }}</p>
+					<p>Status: {{ job.status }}</p>
+				</div>
+			{% endfor %}
+		{% else %}
+			<p class="muted">No jobs yet.</p>
+		{% endif %}
+	</section>
+</div>
+{% endif %}
+
+<section class="panel" style="margin-top: 20px;">
+	<h2>Notifications</h2>
+	{% if notifications %}
+		{% for note in notifications %}
+			<div class="panel" style="margin-top: 12px; background: white;">
+				<p>{{ note.message }}</p>
+				<p class="muted">{{ note.created_at }}</p>
+			</div>
+		{% endfor %}
+	{% else %}
+		<p class="muted">No notifications yet.</p>
+	{% endif %}
+</section>
+{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>{{ role|capitalize }} Dashboard</title>
+	<style>
+		:root {
+			--bg: #f4f7fb;
+			--card: #ffffff;
+			--text: #1f2937;
+			--muted: #6b7280;
+			--accent: #2563eb;
+			--accent-dark: #1d4ed8;
+			--border: #dbe4f0;
+			--soft: #f8fbff;
+		}
+
+		* {
+			box-sizing: border-box;
+		}
+
+		body {
+			margin: 0;
+			min-height: 100vh;
+			padding: 24px;
+			font-family: Arial, Helvetica, sans-serif;
+			background: linear-gradient(135deg, #eaf2ff 0%, #f8fbff 45%, #eef4ff 100%);
+			color: var(--text);
+		}
+
+		.wrap {
+			max-width: 1100px;
+			margin: 0 auto;
+			display: grid;
+			gap: 20px;
+		}
+
+		.card {
+			background: var(--card);
+			border: 1px solid var(--border);
+			border-radius: 20px;
+			padding: 24px;
+			box-shadow: 0 18px 50px rgba(37, 99, 235, 0.12);
+		}
+
+		.header {
+			display: flex;
+			justify-content: space-between;
+			gap: 16px;
+			align-items: center;
+			flex-wrap: wrap;
+		}
+
+		.badge {
+			display: inline-block;
+			padding: 8px 14px;
+			border-radius: 999px;
+			background: #dbeafe;
+			color: var(--accent-dark);
+			font-size: 0.9rem;
+			font-weight: 700;
+		}
+
+		h1,
+		h2,
+		h3 {
+			margin: 0;
+		}
+
+		p {
+			margin: 0;
+			color: var(--muted);
+			line-height: 1.6;
+		}
+
+		.message {
+			background: #eff6ff;
+			color: var(--accent-dark);
+			font-weight: 700;
+		}
+
+		table {
+			width: 100%;
+			border-collapse: collapse;
+			margin-top: 12px;
+		}
+
+		th,
+		td {
+			text-align: left;
+			padding: 10px 8px;
+			border-bottom: 1px solid var(--border);
+			font-size: 0.95rem;
+		}
+
+		th {
+			color: var(--muted);
+		}
+
+		.nav {
+			display: flex;
+			gap: 10px;
+			flex-wrap: wrap;
+		}
+
+		.button {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			padding: 12px 16px;
+			border-radius: 12px;
+			background: var(--accent);
+			color: #fff;
+			text-decoration: none;
+			font-weight: 700;
+			border: 0;
+			cursor: pointer;
+		}
+
+		.button.secondary {
+			background: #dbe4f4;
+			color: var(--accent-dark);
+		}
+
+		.panel {
+			background: var(--soft);
+		}
+	</style>
+</head>
+<body>
+	<div class="wrap">
+		<section class="card header">
+			<div>
+				<span class="badge">{{ role|capitalize }} Dashboard</span>
+				<h1 style="margin-top: 12px;">Simple dashboard</h1>
+				<p>Approved users: {{ approved_count }}</p>
+			</div>
+			<div class="nav">
+				<a class="button secondary" href="{{ url_for('home') }}">Home</a>
+				<a class="button secondary" href="{{ url_for('register') }}">Register</a>
+					<a class="button secondary" href="{{ url_for('student_dashboard') }}">Student</a>
+					<a class="button secondary" href="{{ url_for('faculty_dashboard') }}">Faculty</a>
+					<a class="button secondary" href="{{ url_for('tpo_dashboard') }}">TPO</a>
+					<a class="button secondary" href="{{ url_for('admin_dashboard') }}">Admin</a>
+			</div>
+		</section>
+
+		{% if message %}
+		<section class="card message">{{ message }}</section>
+		{% endif %}
+
+		<section class="card panel">
+			<h2>Users</h2>
+			{% if users %}
+			<table>
+				<thead>
+					<tr>
+						<th>Name</th>
+						<th>Email</th>
+						<th>Status</th>
+					</tr>
+					</thead>
+					<tbody>
+						{% for user in users %}
+						<tr>
+							<td>{{ user.name }}</td>
+							<td>{{ user.email }}</td>
+							<td>{{ 'Approved' if user.approved else 'Pending' }}</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			{% else %}
+			<p>No users found for this role.</p>
+			{% endif %}
+		</section>
+
+		<section class="card panel">
+			<h2>Notifications</h2>
+			{% if notifications %}
+			<table>
+				<thead>
+					<tr>
+						<th>Message</th>
+						<th>Time</th>
+					</tr>
+					</thead>
+					<tbody>
+						{% for note in notifications %}
+						<tr>
+							<td>{{ note.message }}</td>
+							<td>{{ note.created_at }}</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			{% else %}
+			<p>No notifications yet.</p>
+			{% endif %}
+		</section>
+
+		{% if role == 'admin' %}
+		<section class="card panel">
+			<h2>Pending Approvals</h2>
+			{% if pending_users %}
+			<table>
+				<thead>
+					<tr>
+						<th>Name</th>
+						<th>Email</th>
+						<th>Role</th>
+						<th>Action</th>
+					</tr>
+					</thead>
+					<tbody>
+						{% for user in pending_users %}
+						<tr>
+							<td>{{ user.name }}</td>
+							<td>{{ user.email }}</td>
+							<td>{{ user.role }}</td>
+							<td>
+								<form method="POST" action="{{ url_for('approve_user', user_id=user.id) }}">
+									<button class="button" type="submit">Approve</button>
+								</form>
+							</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			{% else %}
+			<p>No pending users right now.</p>
+			{% endif %}
+		</section>
+		{% endif %}
+	</div>
+</body>
+</html>

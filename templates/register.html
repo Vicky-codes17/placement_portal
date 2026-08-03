@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Create Account</h1>
+<p class="muted">Register as a student, faculty member, or TPO. Admin approval is required before login.</p>
+
+<form method="POST" action="{{ url_for('auth.register') }}" style="margin-top: 20px; display: grid; gap: 14px; max-width: 520px;">
+	<div>
+		<label for="full_name">Full Name</label>
+		<input id="full_name" name="full_name" type="text" placeholder="Enter full name" required style="width: 100%; padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px; margin-top: 8px;">
+	</div>
+	<div>
+		<label for="email">Email</label>
+		<input id="email" name="email" type="email" placeholder="Enter email" required style="width: 100%; padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px; margin-top: 8px;">
+	</div>
+	<div>
+		<label for="password">Password</label>
+		<input id="password" name="password" type="password" placeholder="Enter password" required style="width: 100%; padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px; margin-top: 8px;">
+	</div>
+	<div>
+		<label for="role">Role</label>
+		<select id="role" name="role" required style="width: 100%; padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px; margin-top: 8px; background: white;">
+			<option value="" selected disabled>Select role</option>
+			<option value="student">Student</option>
+			<option value="faculty">Faculty</option>
+			<option value="tpo">TPO</option>
+		</select>
+	</div>
+	<button class="button" type="submit">Register</button>
+</form>
+{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Register | Placement Management System</title>
+	<style>
+		:root {
+			--bg: #f4f7fb;
+			--card: #ffffff;
+			--text: #1f2937;
+			--muted: #6b7280;
+			--accent: #2563eb;
+			--accent-dark: #1d4ed8;
+			--border: #dbe4f0;
+			--field: #f8fbff;
+		}
+
+		* {
+			box-sizing: border-box;
+		}
+
+		body {
+			margin: 0;
+			min-height: 100vh;
+			display: grid;
+			place-items: center;
+			font-family: Arial, Helvetica, sans-serif;
+			background: linear-gradient(135deg, #eaf2ff 0%, #f8fbff 45%, #eef4ff 100%);
+			color: var(--text);
+			padding: 24px;
+		}
+
+		.card {
+			width: min(92vw, 520px);
+			background: var(--card);
+			border: 1px solid var(--border);
+			border-radius: 20px;
+			padding: 36px;
+			box-shadow: 0 18px 50px rgba(37, 99, 235, 0.12);
+		}
+
+		h1 {
+			margin: 0 0 8px;
+			font-size: clamp(1.8rem, 4vw, 2.4rem);
+		}
+
+		.subtitle {
+			margin: 0 0 24px;
+			color: var(--muted);
+			line-height: 1.5;
+		}
+
+		.message {
+			margin-bottom: 18px;
+			padding: 12px 14px;
+			border-radius: 12px;
+			background: #eff6ff;
+			color: var(--accent-dark);
+			font-weight: 700;
+		}
+
+		.form-group {
+			margin-bottom: 16px;
+		}
+
+		label {
+			display: block;
+			margin-bottom: 8px;
+			font-weight: 700;
+			font-size: 0.95rem;
+		}
+
+		input,
+		select {
+			width: 100%;
+			padding: 14px 16px;
+			border: 1px solid var(--border);
+			border-radius: 12px;
+			background: var(--field);
+			font-size: 1rem;
+			color: var(--text);
+			outline: none;
+		}
+
+		input:focus,
+		select:focus {
+			border-color: var(--accent);
+			box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+			background: #fff;
+		}
+
+		.button {
+			width: 100%;
+			border: 0;
+			border-radius: 12px;
+			padding: 14px 18px;
+			font-size: 1rem;
+			font-weight: 700;
+			color: #fff;
+			background: var(--accent);
+			cursor: pointer;
+		}
+
+		.button:hover {
+			background: var(--accent-dark);
+		}
+
+		.footer {
+			margin-top: 18px;
+			text-align: center;
+			color: var(--muted);
+		}
+
+		.footer a {
+			color: var(--accent-dark);
+			text-decoration: none;
+			font-weight: 700;
+		}
+	</style>
+</head>
+<body>
+	<main class="card">
+		<h1>Create Account</h1>
+		<p class="subtitle">Enter your name, email, password, and select your role.</p>
+		<p class="subtitle">Request method: {{ request_method }}</p>
+
+		{% if message %}
+		<div class="message">{{ message }}</div>
+		{% endif %}
+
+		<form method="POST" action="{{ url_for('register') }}">
+			<div class="form-group">
+				<label for="full_name">Full Name</label>
+				<input type="text" id="full_name" name="full_name" placeholder="Enter your full name" required>
+			</div>
+
+			<div class="form-group">
+				<label for="email">Email</label>
+				<input type="email" id="email" name="email" placeholder="Enter your email" required>
+			</div>
+
+			<div class="form-group">
+				<label for="password">Password</label>
+				<input type="password" id="password" name="password" placeholder="Enter your password" required>
+			</div>
+
+			<div class="form-group">
+				<label for="role">Role</label>
+				<select id="role" name="role" required>
+					<option value="" disabled selected>Select role</option>
+					<option value="student">Student</option>
+					<option value="faculty">Faculty</option>
+					<option value="tpo">TPO</option>
+				</select>
+			</div>
+
+			<button class="button" type="submit">Register</button>
+		</form>
+
+		<div class="footer">
+			<a href="{{ url_for('home') }}">Back to Home</a>
+		</div>
+	</main>
+</body>
+</html>

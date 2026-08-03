@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="grid" style="align-items: center;">
+	<section>
+		<span style="display: inline-block; padding: 8px 14px; border-radius: 999px; background: #dde8ff; color: var(--primary-dark); font-weight: 700;">Campus Placement Portal</span>
+		<h1 style="margin: 18px 0 10px; font-size: clamp(2.2rem, 5vw, 3.4rem);">Placement management made simple</h1>
+		<p class="muted" style="max-width: 640px; line-height: 1.7;">Register as a student, faculty member, or TPO. Admin approval, job posting, applications, and notifications are all handled inside the portal.</p>
+
+		<div class="grid" style="margin-top: 24px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+			<div class="panel"><strong>Student</strong><p class="muted">View jobs, apply, and track status.</p></div>
+			<div class="panel"><strong>Faculty</strong><p class="muted">Monitor students and placement updates.</p></div>
+			<div class="panel"><strong>TPO</strong><p class="muted">Post drives and review applications.</p></div>
+			<div class="panel"><strong>Admin</strong><p class="muted">Approve accounts and manage the portal.</p></div>
+		</div>
+
+		<div style="margin-top: 26px; display: flex; gap: 12px; flex-wrap: wrap;">
+			<a class="button" href="{{ url_for('auth.register') }}">Create Account</a>
+			<a class="button secondary" href="{{ url_for('auth.login') }}">Login</a>
+		</div>
+	</section>
+
+	<section class="panel">
+		<h2 style="margin-top: 0;">Quick Access</h2>
+		<div style="display: grid; gap: 10px;">
+			<a class="button secondary" href="{{ url_for('dashboard.role_dashboard', role='student') }}">Student Dashboard</a>
+			<a class="button secondary" href="{{ url_for('dashboard.role_dashboard', role='faculty') }}">Faculty Dashboard</a>
+			<a class="button secondary" href="{{ url_for('dashboard.role_dashboard', role='tpo') }}">TPO Dashboard</a>
+			<a class="button secondary" href="{{ url_for('dashboard.role_dashboard', role='admin') }}">Admin Dashboard</a>
+		</div>
+	</section>
+</div>
+{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Placement Management System</title>
+	<style>
+		:root {
+			--bg: #f4f7fb;
+			--card: #ffffff;
+			--text: #1f2937;
+			--muted: #6b7280;
+			--accent: #2563eb;
+			--accent-dark: #1d4ed8;
+			--border: #dbe4f0;
+		}
+
+		* {
+			box-sizing: border-box;
+		}
+
+		body {
+			margin: 0;
+			min-height: 100vh;
+			display: grid;
+			place-items: center;
+			font-family: Arial, Helvetica, sans-serif;
+			background: linear-gradient(135deg, #eaf2ff 0%, #f8fbff 45%, #eef4ff 100%);
+			color: var(--text);
+		}
+
+		.card {
+			width: min(92vw, 560px);
+			background: var(--card);
+			border: 1px solid var(--border);
+			border-radius: 20px;
+			padding: 40px;
+			box-shadow: 0 18px 50px rgba(37, 99, 235, 0.12);
+		}
+
+		.badge {
+			display: inline-block;
+			padding: 8px 14px;
+			border-radius: 999px;
+			background: #dbeafe;
+			color: var(--accent-dark);
+			font-size: 0.9rem;
+			font-weight: 700;
+		}
+
+		h1 {
+			margin: 18px 0 10px;
+			font-size: clamp(2rem, 4vw, 2.8rem);
+		}
+
+		p {
+			margin: 0;
+			color: var(--muted);
+			line-height: 1.6;
+		}
+
+		.actions {
+			margin-top: 28px;
+		}
+
+		.button {
+			display: inline-block;
+			padding: 14px 22px;
+			border-radius: 12px;
+			text-decoration: none;
+			font-weight: 700;
+			background: var(--accent);
+			color: #fff;
+		}
+
+		.button:hover {
+			background: var(--accent-dark);
+		}
+
+		.hint {
+			margin-top: 14px;
+			font-size: 0.95rem;
+		}
+	</style>
+</head>
+<body>
+	<main class="card">
+		<span class="badge">Placement Management System</span>
+		<h1>Welcome</h1>
+		<p>
+			Manage placement activities in one clean place for students, faculty,
+			and TPO users.
+		</p>
+		<div class="actions">
+			<a class="button" href="{{ url_for('register') }}">Create Account</a>
+			<a class="button" href="{{ url_for('student_dashboard') }}">Student Dashboard</a>
+			<a class="button" href="{{ url_for('faculty_dashboard') }}">Faculty Dashboard</a>
+			<a class="button" href="{{ url_for('tpo_dashboard') }}">TPO Dashboard</a>
+			<a class="button" href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
+		</div>
+		<p class="hint">Simple registration for name, email, password, and role.</p>
+	</main>
+</body>
+</html>

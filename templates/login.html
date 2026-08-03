@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Login</h1>
+<p class="muted">Use your approved account to access your role dashboard.</p>
+
+<form method="POST" action="{{ url_for('auth.login') }}" style="margin-top: 20px; display: grid; gap: 14px; max-width: 520px;">
+	<div>
+		<label for="email">Email</label>
+		<input id="email" name="email" type="email" placeholder="Enter email" required style="width: 100%; padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px; margin-top: 8px;">
+	</div>
+	<div>
+		<label for="password">Password</label>
+		<input id="password" name="password" type="password" placeholder="Enter password" required style="width: 100%; padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px; margin-top: 8px;">
+	</div>
+	<button class="button" type="submit">Login</button>
+</form>
+
+<p class="muted" style="margin-top: 18px;">Admin account is seeded as admin@placement.com / admin123.</p>
+{% endblock %}
