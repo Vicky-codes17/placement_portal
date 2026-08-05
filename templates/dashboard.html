@@ -115,6 +115,18 @@
 					<p class="muted">{{ application.company }}</p>
 					<p>{{ application.student_name }} ({{ application.student_email }})</p>
 					<p>Status: {{ application.status }}</p>
+					{% if application.status == 'pending' %}
+					<div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px;">
+						<form method="POST" action="{{ url_for('jobs.review_application', application_id=application.id) }}">
+							<input type="hidden" name="decision" value="accepted">
+							<button class="button" type="submit">Accept</button>
+						</form>
+						<form method="POST" action="{{ url_for('jobs.review_application', application_id=application.id) }}">
+							<input type="hidden" name="decision" value="rejected">
+							<button class="button secondary" type="submit">Reject</button>
+						</form>
+					</div>
+					{% endif %}
 				</div>
 			{% endfor %}
 		{% else %}
@@ -154,6 +166,8 @@
 				</tr>
 				{% endfor %}
 			</table>
+		{% else %}
+			<p class="muted">No users found.</p>
 		{% endif %}
 	</section>
 	<section class="panel">
@@ -187,241 +201,3 @@
 	{% endif %}
 </section>
 {% endblock %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>{{ role|capitalize }} Dashboard</title>
-	<style>
-		:root {
-			--bg: #f4f7fb;
-			--card: #ffffff;
-			--text: #1f2937;
-			--muted: #6b7280;
-			--accent: #2563eb;
-			--accent-dark: #1d4ed8;
-			--border: #dbe4f0;
-			--soft: #f8fbff;
-		}
-
-		* {
-			box-sizing: border-box;
-		}
-
-		body {
-			margin: 0;
-			min-height: 100vh;
-			padding: 24px;
-			font-family: Arial, Helvetica, sans-serif;
-			background: linear-gradient(135deg, #eaf2ff 0%, #f8fbff 45%, #eef4ff 100%);
-			color: var(--text);
-		}
-
-		.wrap {
-			max-width: 1100px;
-			margin: 0 auto;
-			display: grid;
-			gap: 20px;
-		}
-
-		.card {
-			background: var(--card);
-			border: 1px solid var(--border);
-			border-radius: 20px;
-			padding: 24px;
-			box-shadow: 0 18px 50px rgba(37, 99, 235, 0.12);
-		}
-
-		.header {
-			display: flex;
-			justify-content: space-between;
-			gap: 16px;
-			align-items: center;
-			flex-wrap: wrap;
-		}
-
-		.badge {
-			display: inline-block;
-			padding: 8px 14px;
-			border-radius: 999px;
-			background: #dbeafe;
-			color: var(--accent-dark);
-			font-size: 0.9rem;
-			font-weight: 700;
-		}
-
-		h1,
-		h2,
-		h3 {
-			margin: 0;
-		}
-
-		p {
-			margin: 0;
-			color: var(--muted);
-			line-height: 1.6;
-		}
-
-		.message {
-			background: #eff6ff;
-			color: var(--accent-dark);
-			font-weight: 700;
-		}
-
-		table {
-			width: 100%;
-			border-collapse: collapse;
-			margin-top: 12px;
-		}
-
-		th,
-		td {
-			text-align: left;
-			padding: 10px 8px;
-			border-bottom: 1px solid var(--border);
-			font-size: 0.95rem;
-		}
-
-		th {
-			color: var(--muted);
-		}
-
-		.nav {
-			display: flex;
-			gap: 10px;
-			flex-wrap: wrap;
-		}
-
-		.button {
-			display: inline-flex;
-			align-items: center;
-			justify-content: center;
-			padding: 12px 16px;
-			border-radius: 12px;
-			background: var(--accent);
-			color: #fff;
-			text-decoration: none;
-			font-weight: 700;
-			border: 0;
-			cursor: pointer;
-		}
-
-		.button.secondary {
-			background: #dbe4f4;
-			color: var(--accent-dark);
-		}
-
-		.panel {
-			background: var(--soft);
-		}
-	</style>
-</head>
-<body>
-	<div class="wrap">
-		<section class="card header">
-			<div>
-				<span class="badge">{{ role|capitalize }} Dashboard</span>
-				<h1 style="margin-top: 12px;">Simple dashboard</h1>
-				<p>Approved users: {{ approved_count }}</p>
-			</div>
-			<div class="nav">
-				<a class="button secondary" href="{{ url_for('home') }}">Home</a>
-				<a class="button secondary" href="{{ url_for('register') }}">Register</a>
-					<a class="button secondary" href="{{ url_for('student_dashboard') }}">Student</a>
-					<a class="button secondary" href="{{ url_for('faculty_dashboard') }}">Faculty</a>
-					<a class="button secondary" href="{{ url_for('tpo_dashboard') }}">TPO</a>
-					<a class="button secondary" href="{{ url_for('admin_dashboard') }}">Admin</a>
-			</div>
-		</section>
-
-		{% if message %}
-		<section class="card message">{{ message }}</section>
-		{% endif %}
-
-		<section class="card panel">
-			<h2>Users</h2>
-			{% if users %}
-			<table>
-				<thead>
-					<tr>
-						<th>Name</th>
-						<th>Email</th>
-						<th>Status</th>
-					</tr>
-					</thead>
-					<tbody>
-						{% for user in users %}
-						<tr>
-							<td>{{ user.name }}</td>
-							<td>{{ user.email }}</td>
-							<td>{{ 'Approved' if user.approved else 'Pending' }}</td>
-						</tr>
-						{% endfor %}
-					</tbody>
-				</table>
-			{% else %}
-			<p>No users found for this role.</p>
-			{% endif %}
-		</section>
-
-		<section class="card panel">
-			<h2>Notifications</h2>
-			{% if notifications %}
-			<table>
-				<thead>
-					<tr>
-						<th>Message</th>
-						<th>Time</th>
-					</tr>
-					</thead>
-					<tbody>
-						{% for note in notifications %}
-						<tr>
-							<td>{{ note.message }}</td>
-							<td>{{ note.created_at }}</td>
-						</tr>
-						{% endfor %}
-					</tbody>
-				</table>
-			{% else %}
-			<p>No notifications yet.</p>
-			{% endif %}
-		</section>
-
-		{% if role == 'admin' %}
-		<section class="card panel">
-			<h2>Pending Approvals</h2>
-			{% if pending_users %}
-			<table>
-				<thead>
-					<tr>
-						<th>Name</th>
-						<th>Email</th>
-						<th>Role</th>
-						<th>Action</th>
-					</tr>
-					</thead>
-					<tbody>
-						{% for user in pending_users %}
-						<tr>
-							<td>{{ user.name }}</td>
-							<td>{{ user.email }}</td>
-							<td>{{ user.role }}</td>
-							<td>
-								<form method="POST" action="{{ url_for('approve_user', user_id=user.id) }}">
-									<button class="button" type="submit">Approve</button>
-								</form>
-							</td>
-						</tr>
-						{% endfor %}
-					</tbody>
-				</table>
-			{% else %}
-			<p>No pending users right now.</p>
-			{% endif %}
-		</section>
-		{% endif %}
-	</div>
-</body>
-</html>

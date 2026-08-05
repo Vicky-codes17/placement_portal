@@ -1,6 +1,6 @@
-from flask import Blueprint, flash, redirect, request, url_for
+from flask import Blueprint, abort, flash, redirect, request, url_for
 
-from utils import get_current_user, get_db_connection, login_required
+from utils import add_notification, get_current_user, get_db_connection, login_required
 
 jobs_bp = Blueprint("jobs", __name__)
 
@@ -71,3 +71,53 @@ def apply_for_job(job_id):
 
     flash("Application submitted successfully.", "success")
     return redirect(url_for("dashboard.role_dashboard", role="student"))
+
+
+@jobs_bp.route("/applications/<int:application_id>/decision", methods=["POST"])
+@login_required
+def review_application(application_id):
+    current_user = get_current_user()
+    if current_user["role"] not in {"tpo", "admin"}:
+        abort(403)
+
+    decision = request.form.get("decision", "").strip().lower()
+    if decision not in {"accepted", "rejected"}:
+        flash("Please choose accept or reject.", "error")
+        return redirect(url_for("dashboard.role_dashboard", role=current_user["role"]))
+
+    connection = get_db_connection()
+    application = connection.execute(
+        """
+        SELECT applications.id, applications.status, applications.user_id,
+               jobs.title, jobs.posted_by
+        FROM applications
+        JOIN jobs ON jobs.id = applications.job_id
+        WHERE applications.id = ?
+        """,
+        (application_id,),
+    ).fetchone()
+
+    if application is None:
+        connection.close()
+        abort(404)
+
+    if current_user["role"] == "tpo" and application["posted_by"] != current_user["id"]:
+        connection.close()
+        abort(403)
+
+    if application["status"] != "pending":
+        connection.close()
+        flash("This application was already reviewed.", "info")
+        return redirect(url_for("dashboard.role_dashboard", role=current_user["role"]))
+
+    connection.execute(
+        "UPDATE applications SET status = ? WHERE id = ?",
+        (decision, application_id),
+    )
+    connection.commit()
+    connection.close()
+
+    student_message = f"Your application for {application['title']} was {decision} by the TPO."
+    add_notification(application["user_id"], student_message)
+    flash(f"Application {decision} successfully.", "success")
+    return redirect(url_for("dashboard.role_dashboard", role=current_user["role"]))

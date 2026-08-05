@@ -72,14 +72,15 @@ def _base_context(role):
         ).fetchall()
         applications = connection.execute(
             """
-            SELECT applications.id, applications.status, applications.applied_at,
+             SELECT applications.id, applications.user_id, applications.job_id,
+                 applications.status, applications.applied_at,
                    jobs.title, jobs.company,
                    users.name AS student_name, users.email AS student_email
             FROM applications
             JOIN jobs ON jobs.id = applications.job_id
             JOIN users ON users.id = applications.user_id
             WHERE jobs.posted_by = ?
-            ORDER BY applications.id DESC
+             ORDER BY CASE applications.status WHEN 'pending' THEN 0 WHEN 'accepted' THEN 1 ELSE 2 END, applications.id DESC
             """,
             (user["id"],),
         ).fetchall()
